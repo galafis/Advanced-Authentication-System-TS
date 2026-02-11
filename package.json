@@ -1,20 +1,41 @@
 {
   "name": "advanced-authentication-system-ts",
-  "version": "1.0.0",
-  "description": "Professional Authentication system built with TypeScript",
-  "main": "dist/main.js",
+  "version": "2.0.0",
+  "description": "Enterprise-grade authentication system with JWT, MFA, and role-based access control built with TypeScript",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "scripts": {
     "build": "tsc",
     "start": "node dist/main.js",
     "dev": "ts-node main.ts",
-    "test": "jest"
+    "test": "jest --coverage",
+    "test:watch": "jest --watch",
+    "lint": "tsc --noEmit"
   },
-  "keywords": ["typescript", "authentication", "enterprise", "professional"],
+  "keywords": [
+    "typescript",
+    "authentication",
+    "jwt",
+    "mfa",
+    "totp",
+    "security",
+    "enterprise",
+    "bcrypt"
+  ],
   "author": "Gabriel Demetrios Lafis",
   "license": "MIT",
   "devDependencies": {
+    "@types/bcryptjs": "^2.4.6",
+    "@types/jest": "^30.0.0",
+    "@types/jsonwebtoken": "^9.0.10",
     "@types/node": "^20.0.0",
-    "typescript": "^5.0.0",
-    "ts-node": "^10.0.0"
+    "jest": "^30.2.0",
+    "ts-jest": "^29.4.6",
+    "ts-node": "^10.0.0",
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.3",
+    "jsonwebtoken": "^9.0.3"
   }
 }
