@@ -1,212 +1,115 @@
-/**
- * Advanced-Authentication-System-TS - Professional TypeScript Implementation
- * Enterprise-grade Authentication system
- */
+import { AuthService } from "./src/services/auth.service";
+import { InMemoryUserStore } from "./src/services/user.store";
+import { createConfig } from "./src/config";
+import { MfaRequiredError } from "./src/errors";
 
-interface DataModel {
-    id: string;
-    timestamp: Date;
-    value: number;
-    metadata: Record<string, any>;
-}
-
-interface AnalysisResult {
-    summary: {
-        totalRecords: number;
-        averageValue: number;
-        processingTime: number;
-    };
-    insights: string[];
-    recommendations: string[];
-}
-
-class AuthenticationSystem {
-    private data: DataModel[] = [];
-    private config: {
-        batchSize: number;
-        timeout: number;
-        retryAttempts: number;
-    };
-
-    constructor() {
-        this.config = {
-            batchSize: 1000,
-            timeout: 30000,
-            retryAttempts: 3
-        };
-    }
-
-    /**
-     * Initialize the system with configuration
-     */
-    public async initialize(config?: Partial<typeof this.config>): Promise<void> {
-        if (config) {
-            this.config = { ...this.config, ...config };
-        }
-        
-        console.log('Initializing Advanced-Authentication-System-TS System...');
-        await this.loadInitialData();
-        console.log('System initialized successfully!');
-    }
-
-    /**
-     * Load initial data set
-     */
-    private async loadInitialData(): Promise<void> {
-        try {
-            // Simulate data loading
-            this.data = this.generateSampleData(1000);
-            console.log(`Loaded ${this.data.length} records`);
-        } catch (error) {
-            console.error('Error loading data:', error);
-            throw new Error('Failed to initialize data');
-        }
-    }
-
-    /**
-     * Generate sample data for demonstration
-     */
-    private generateSampleData(count: number): DataModel[] {
-        const data: DataModel[] = [];
-        
-        for (let i = 0; i < count; i++) {
-            data.push({
-                id: `record-${i + 1}`,
-                timestamp: new Date(Date.now() - Math.random() * 86400000),
-                value: Math.random() * 1000,
-                metadata: {
-                    category: ['A', 'B', 'C'][Math.floor(Math.random() * 3)],
-                    priority: Math.floor(Math.random() * 5) + 1,
-                    source: 'generated'
-                }
-            });
-        }
-        
-        return data;
-    }
-
-    /**
-     * Process data and generate analysis
-     */
-    public async processData(): Promise<AnalysisResult> {
-        const startTime = Date.now();
-        
-        try {
-            const summary = this.calculateSummary();
-            const insights = this.generateInsights();
-            const recommendations = this.generateRecommendations();
-            
-            const processingTime = Date.now() - startTime;
-            
-            return {
-                summary: {
-                    ...summary,
-                    processingTime
-                },
-                insights,
-                recommendations
-            };
-        } catch (error) {
-            console.error('Error processing data:', error);
-            throw new Error('Data processing failed');
-        }
-    }
-
-    /**
-     * Calculate summary statistics
-     */
-    private calculateSummary() {
-        const totalRecords = this.data.length;
-        const averageValue = this.data.reduce((sum, record) => sum + record.value, 0) / totalRecords;
-        
-        return {
-            totalRecords,
-            averageValue: Math.round(averageValue * 100) / 100
-        };
-    }
-
-    /**
-     * Generate insights from data
-     */
-    private generateInsights(): string[] {
-        const insights: string[] = [];
-        
-        // Category analysis
-        const categoryCount = this.data.reduce((acc, record) => {
-            const category = record.metadata.category;
-            acc[category] = (acc[category] || 0) + 1;
-            return acc;
-        }, {} as Record<string, number>);
-        
-        const dominantCategory = Object.entries(categoryCount)
-            .sort(([,a], [,b]) => b - a)[0];
-        
-        insights.push(`Category '${dominantCategory[0]}' represents ${Math.round(dominantCategory[1] / this.data.length * 100)}% of data`);
-        
-        // Value analysis
-        const avgValue = this.data.reduce((sum, record) => sum + record.value, 0) / this.data.length;
-        const highValueRecords = this.data.filter(record => record.value > avgValue * 1.5).length;
-        
-        if (highValueRecords > 0) {
-            insights.push(`${highValueRecords} records show significantly high values (>150% of average)`);
-        }
-        
-        return insights;
-    }
-
-    /**
-     * Generate recommendations
-     */
-    private generateRecommendations(): string[] {
-        const recommendations: string[] = [];
-        
-        if (this.data.length < 100) {
-            recommendations.push('Consider increasing data collection for more robust analysis');
-        }
-        
-        const recentData = this.data.filter(record => 
-            Date.now() - record.timestamp.getTime() < 24 * 60 * 60 * 1000
-        );
-        
-        if (recentData.length / this.data.length < 0.1) {
-            recommendations.push('Data appears outdated - consider refreshing data sources');
-        }
-        
-        return recommendations;
-    }
-
-    /**
-     * Export processed data
-     */
-    public exportData(): { data: DataModel[]; metadata: any } {
-        return {
-            data: this.data,
-            metadata: {
-                exportTime: new Date().toISOString(),
-                recordCount: this.data.length,
-                systemVersion: '1.0.0'
-            }
-        };
-    }
-}
-
-// Main execution function
 async function main(): Promise<void> {
-    console.log('Starting Advanced-Authentication-System-TS...');
-    
-    const system = new AuthenticationSystem();
-    await system.initialize();
-    
-    const results = await system.processData();
-    console.log('Analysis Results:', results);
-    
-    console.log('System running successfully!');
+  console.log("=== Advanced Authentication System - Demo ===\n");
+
+  const config = createConfig({
+    jwt: {
+      accessTokenSecret: "demo-access-secret-do-not-use-in-production",
+      refreshTokenSecret: "demo-refresh-secret-do-not-use-in-production",
+    },
+    password: {
+      minLength: 8,
+    },
+  });
+
+  const userStore = new InMemoryUserStore();
+  const authService = new AuthService(config, userStore);
+
+  try {
+    console.log("1. Registering a new user...");
+    const registerResult = await authService.register({
+      email: "demo@example.com",
+      password: "SecureP@ss123!",
+    });
+    console.log("   User registered:", registerResult.user.email);
+    console.log("   User ID:", registerResult.user.id);
+    console.log("   Access token received:", registerResult.tokens.accessToken.substring(0, 20) + "...");
+    console.log();
+
+    console.log("2. Logging in...");
+    const loginResult = await authService.login({
+      email: "demo@example.com",
+      password: "SecureP@ss123!",
+    });
+    console.log("   Login successful!");
+    console.log("   Token expires in:", loginResult.tokens.expiresIn, "seconds");
+    console.log();
+
+    console.log("3. Verifying access token...");
+    const verified = authService.verifyAccessToken(loginResult.tokens.accessToken);
+    console.log("   Token valid for user:", verified.email);
+    console.log("   Roles:", verified.roles.join(", "));
+    console.log();
+
+    console.log("4. Refreshing tokens...");
+    const newTokens = await authService.refreshTokens(loginResult.tokens.refreshToken);
+    console.log("   New access token received:", newTokens.accessToken.substring(0, 20) + "...");
+    console.log();
+
+    console.log("5. Setting up MFA...");
+    const mfaSetup = await authService.setupMfa(registerResult.user.id);
+    console.log("   MFA secret generated:", mfaSetup.secret.substring(0, 8) + "...");
+    console.log("   OTPAuth URL:", mfaSetup.otpauthUrl.substring(0, 40) + "...");
+    console.log();
+
+    console.log("6. Changing password...");
+    await authService.changePassword(
+      registerResult.user.id,
+      "SecureP@ss123!",
+      "NewSecureP@ss456!"
+    );
+    console.log("   Password changed successfully!");
+    console.log();
+
+    console.log("7. Logging in with new password...");
+    await authService.login({
+      email: "demo@example.com",
+      password: "NewSecureP@ss456!",
+    });
+    console.log("   Login with new password successful!");
+    console.log();
+
+    console.log("8. Testing invalid login...");
+    try {
+      await authService.login({
+        email: "demo@example.com",
+        password: "WrongPassword123!",
+      });
+    } catch (error) {
+      if (error instanceof Error) {
+        console.log("   Expected error:", error.message);
+      }
+    }
+    console.log();
+
+    console.log("9. Logging out...");
+    await authService.logout(newTokens.refreshToken);
+    console.log("   Logged out successfully!");
+    console.log();
+
+    console.log("10. Fetching user profile...");
+    const profile = await authService.getUser(registerResult.user.id);
+    console.log("    User:", JSON.stringify(profile, null, 4));
+    console.log();
+
+    console.log("=== Demo Complete ===");
+  } catch (error) {
+    if (error instanceof MfaRequiredError) {
+      console.log("MFA token required for this operation");
+    } else if (error instanceof Error) {
+      console.error("Error:", error.message);
+    }
+  } finally {
+    authService.destroy();
+  }
 }
 
-// Export for module usage
-export { AuthenticationSystem, DataModel, AnalysisResult };
-
-// Execute if run directly
 if (require.main === module) {
-    main().catch(console.error);
+  main().catch(console.error);
 }
+
+export { main };
