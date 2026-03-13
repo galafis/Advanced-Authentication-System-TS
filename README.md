@@ -1,62 +1,116 @@
-# 🚀 Advanced Authentication System Ts
+# Advanced Authentication System
 
-> Professional repository showcasing advanced development skills
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.0+-3178C6.svg?logo=typescript&logoColor=white)](https://typescriptlang.org)
+[![Node.js](https://img.shields.io/badge/Node.js-20+-339933.svg?logo=node.js&logoColor=white)](https://nodejs.org)
+[![Jest](https://img.shields.io/badge/Jest-Testing-C21325.svg?logo=jest&logoColor=white)](https://jestjs.io)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker)](Dockerfile)
+[![Docker](https://img.shields.io/badge/Docker-Ready-2496ED.svg?logo=docker&logoColor=white)](Dockerfile)
 
-[![TypeScript](https://img.shields.io/badge/TypeScript-5.3-3178C6.svg)](https://img.shields.io/badge/)
-[![License](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
-[English](#english) | [Português](#português)
+[English](#english) | [Portugues (BR)](#portugues-br)
 
 ---
 
 ## English
 
-### 🎯 Overview
+### Overview
 
-**Advanced Authentication System Ts** is a production-grade TypeScript application that showcases modern software engineering practices including clean architecture, comprehensive testing, containerized deployment, and CI/CD readiness.
+Enterprise-grade authentication system built with TypeScript, featuring JWT token management, multi-factor authentication (TOTP-based MFA), role-based access control (RBAC), and configurable security policies. Designed for production environments requiring robust identity management, rate limiting, and account lockout protection.
 
-The codebase comprises **2,051 lines** of source code organized across **20 modules**, following industry best practices for maintainability, scalability, and code quality.
-
-### ✨ Key Features
-
-- **📐 Clean Architecture**: Modular design with clear separation of concerns
-- **🧪 Test Coverage**: Unit and integration tests for reliability
-- **📚 Documentation**: Comprehensive inline documentation and examples
-- **🔧 Configuration**: Environment-based configuration management
-
-### 🏗️ Architecture
+### Architecture
 
 ```mermaid
 graph TB
-    subgraph Core["🏗️ Core"]
-        A[Main Module]
-        B[Business Logic]
-        C[Data Processing]
+    subgraph Client["Client Layer"]
+        A[Authentication Request]
     end
-    
-    subgraph Support["🔧 Support"]
-        D[Configuration]
-        E[Utilities]
-        F[Tests]
+
+    subgraph Auth["Authentication Engine"]
+        B[Auth Service]
+        C[Token Service]
+        D[Password Service]
+        E[MFA Service]
     end
-    
-    A --> B --> C
-    D --> A
-    E --> B
-    F -.-> B
-    
-    style Core fill:#e1f5fe
-    style Support fill:#f3e5f5
+
+    subgraph Security["Security Layer"]
+        F[Rate Limiter]
+        G[Input Validation]
+        H[Account Lockout]
+    end
+
+    subgraph Storage["Data Layer"]
+        I[User Store]
+        J[Token Cache]
+    end
+
+    A --> B
+    B --> C
+    B --> D
+    B --> E
+    B --> F
+    B --> G
+    C --> J
+    D --> I
+    E --> I
+    F --> H
+
+    style Client fill:#e3f2fd
+    style Auth fill:#e8f5e9
+    style Security fill:#fff3e0
+    style Storage fill:#f3e5f5
 ```
 
-### 🚀 Quick Start
+### Authentication Flow
 
-#### Prerequisites
+```mermaid
+sequenceDiagram
+    participant C as Client
+    participant A as Auth Service
+    participant P as Password Service
+    participant M as MFA Service
+    participant T as Token Service
 
-- Node.js 20+
-- npm or yarn
+    C->>A: Login (email, password)
+    A->>P: Verify password hash
+    P-->>A: Valid credentials
+    A->>M: Check MFA enabled
+    M-->>A: MFA required
+    A-->>C: MFA challenge
+    C->>A: Submit TOTP code
+    A->>M: Verify TOTP
+    M-->>A: Valid code
+    A->>T: Generate JWT pair
+    T-->>A: Access + Refresh tokens
+    A-->>C: Authentication success
+```
 
-#### Installation
+### Key Features
+
+- **JWT Token Management** -- Access and refresh token pairs with configurable expiration and automatic rotation
+- **Multi-Factor Authentication** -- TOTP-based MFA with QR code provisioning and backup codes
+- **Role-Based Access Control** -- Granular RBAC with hierarchical role inheritance
+- **Password Security** -- Bcrypt hashing with configurable salt rounds and complexity policies
+- **Rate Limiting** -- Sliding window rate limiter to prevent brute-force attacks
+- **Account Lockout** -- Automatic lockout after configurable failed attempt thresholds
+- **Input Validation** -- Schema-based validation for all authentication endpoints
+- **Audit Trail** -- Comprehensive logging of authentication events
+
+### Industry Application
+
+This system addresses core identity management challenges in enterprise applications, fintech platforms, and SaaS products. The modular architecture supports integration with existing microservices, API gateways, and OAuth providers, making it suitable for banking applications, healthcare portals, and multi-tenant platforms requiring SOC2-compliant authentication workflows.
+
+### Tech Stack
+
+| Technology | Purpose |
+|------------|---------|
+| **TypeScript 5.0+** | Type-safe application logic |
+| **Node.js 20+** | Runtime environment |
+| **bcryptjs** | Password hashing |
+| **jsonwebtoken** | JWT token generation and verification |
+| **Jest** | Unit and integration testing |
+| **Docker** | Containerized deployment |
+
+### Quick Start
 
 ```bash
 # Clone the repository
@@ -65,11 +119,10 @@ cd Advanced-Authentication-System-TS
 
 # Install dependencies
 npm install
-```
 
-#### Running
+# Configure environment
+cp .env.example .env
 
-```bash
 # Development mode
 npm run dev
 
@@ -78,29 +131,29 @@ npm run build
 npm start
 ```
 
-### 🧪 Testing
+### Docker
 
 ```bash
-# Run all tests
-npm test
+# Build the image
+docker build -t advanced-auth-system .
 
-# Run with coverage
-npm run test:coverage
+# Run the container
+docker run -p 3000:3000 --env-file .env advanced-auth-system
 ```
 
-### 📁 Project Structure
+### Project Structure
 
 ```
 Advanced-Authentication-System-TS/
-├── src/          # Source code
-│   ├── services/      # Business logic
+├── src/
+│   ├── services/
 │   │   ├── __tests__/
 │   │   ├── auth.service.ts
 │   │   ├── mfa.service.ts
 │   │   ├── password.service.ts
 │   │   ├── token.service.ts
 │   │   └── user.store.ts
-│   ├── utils/         # Utilities
+│   ├── utils/
 │   │   ├── __tests__/
 │   │   ├── rate-limiter.ts
 │   │   └── validation.ts
@@ -108,50 +161,32 @@ Advanced-Authentication-System-TS/
 │   ├── errors.ts
 │   ├── index.ts
 │   └── types.ts
-├── LICENSE
-├── README.md
-├── jest.config.ts
 ├── main.ts
+├── Dockerfile
+├── jest.config.ts
 ├── package.json
-└── tsconfig.json
+├── tsconfig.json
+└── LICENSE
 ```
 
-### 🔒 Security Considerations
+### Testing
 
-| Feature | Implementation |
-|---------|---------------|
-| **Authentication** | JWT tokens with configurable expiration |
-| **Authorization** | Role-based access control (RBAC) |
-| **Input Validation** | Schema-based validation on all endpoints |
-| **Rate Limiting** | Configurable request throttling |
-| **Data Encryption** | AES-256 for sensitive data at rest |
-| **SQL Injection** | ORM-based queries prevent injection |
-| **CORS** | Configurable CORS policies |
-| **Audit Logging** | Complete request/response audit trail |
+```bash
+# Run all tests
+npm test
 
-> ⚠️ **Production Deployment**: Always configure proper SSL/TLS, rotate secrets regularly, and follow the principle of least privilege.
+# Run with coverage
+npm run test -- --coverage
 
-### 🛠️ Tech Stack
+# Watch mode
+npm run test:watch
+```
 
-| Technology | Description | Role |
-|------------|-------------|------|
-| **TypeScript** | Core Language | Primary |
-
-### 🤝 Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request. For major changes, please open an issue first to discuss what you would like to change.
-
-1. Fork the project
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
-
-### 📄 License
+### License
 
 This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-### 👤 Author
+### Author
 
 **Gabriel Demetrios Lafis**
 - GitHub: [@galafis](https://github.com/galafis)
@@ -159,143 +194,84 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 
 ---
 
-## Português
+## Portugues (BR)
 
-### 🎯 Visão Geral
+### Visao Geral
 
-**Advanced Authentication System Ts** é uma aplicação TypeScript de nível profissional que demonstra práticas modernas de engenharia de software, incluindo arquitetura limpa, testes abrangentes, implantação containerizada e prontidão para CI/CD.
+Sistema de autenticacao de nivel empresarial construido com TypeScript, apresentando gerenciamento de tokens JWT, autenticacao multi-fator (MFA baseada em TOTP), controle de acesso baseado em funcoes (RBAC) e politicas de seguranca configuraveis. Projetado para ambientes de producao que exigem gerenciamento robusto de identidade, limitacao de taxa e protecao contra bloqueio de conta.
 
-A base de código compreende **2,051 linhas** de código-fonte organizadas em **20 módulos**, seguindo as melhores práticas do setor para manutenibilidade, escalabilidade e qualidade de código.
+### Principais Funcionalidades
 
-### ✨ Funcionalidades Principais
+- **Gerenciamento de Tokens JWT** -- Pares de tokens de acesso e atualizacao com expiracao configuravel e rotacao automatica
+- **Autenticacao Multi-Fator** -- MFA baseada em TOTP com provisionamento de QR code e codigos de backup
+- **Controle de Acesso Baseado em Funcoes** -- RBAC granular com heranca hierarquica de funcoes
+- **Seguranca de Senha** -- Hashing bcrypt com salt rounds configuraveis e politicas de complexidade
+- **Limitacao de Taxa** -- Limitador de taxa por janela deslizante para prevenir ataques de forca bruta
+- **Bloqueio de Conta** -- Bloqueio automatico apos limites configuraveis de tentativas falhas
+- **Validacao de Entrada** -- Validacao baseada em schema para todos os endpoints de autenticacao
+- **Trilha de Auditoria** -- Registro abrangente de eventos de autenticacao
 
-- **📐 Clean Architecture**: Modular design with clear separation of concerns
-- **🧪 Test Coverage**: Unit and integration tests for reliability
-- **📚 Documentation**: Comprehensive inline documentation and examples
-- **🔧 Configuration**: Environment-based configuration management
+### Aplicacao na Industria
 
-### 🏗️ Arquitetura
+Este sistema aborda desafios centrais de gerenciamento de identidade em aplicacoes empresariais, plataformas fintech e produtos SaaS. A arquitetura modular suporta integracao com microservicos existentes, API gateways e provedores OAuth, tornando-o adequado para aplicacoes bancarias, portais de saude e plataformas multi-tenant que requerem fluxos de autenticacao em conformidade com SOC2.
 
-```mermaid
-graph TB
-    subgraph Core["🏗️ Core"]
-        A[Main Module]
-        B[Business Logic]
-        C[Data Processing]
-    end
-    
-    subgraph Support["🔧 Support"]
-        D[Configuration]
-        E[Utilities]
-        F[Tests]
-    end
-    
-    A --> B --> C
-    D --> A
-    E --> B
-    F -.-> B
-    
-    style Core fill:#e1f5fe
-    style Support fill:#f3e5f5
-```
+### Stack Tecnologica
 
-### 🚀 Início Rápido
+| Tecnologia | Finalidade |
+|------------|-----------|
+| **TypeScript 5.0+** | Logica de aplicacao type-safe |
+| **Node.js 20+** | Ambiente de execucao |
+| **bcryptjs** | Hashing de senhas |
+| **jsonwebtoken** | Geracao e verificacao de tokens JWT |
+| **Jest** | Testes unitarios e de integracao |
+| **Docker** | Deploy containerizado |
 
-#### Prerequisites
-
-- Node.js 20+
-- npm or yarn
-
-#### Installation
+### Inicio Rapido
 
 ```bash
-# Clone the repository
+# Clonar o repositorio
 git clone https://github.com/galafis/Advanced-Authentication-System-TS.git
 cd Advanced-Authentication-System-TS
 
-# Install dependencies
+# Instalar dependencias
 npm install
-```
 
-#### Running
+# Configurar ambiente
+cp .env.example .env
 
-```bash
-# Development mode
+# Modo de desenvolvimento
 npm run dev
 
-# Production build
+# Build de producao
 npm run build
 npm start
 ```
 
-### 🧪 Testing
+### Docker
 
 ```bash
-# Run all tests
+# Construir a imagem
+docker build -t advanced-auth-system .
+
+# Executar o container
+docker run -p 3000:3000 --env-file .env advanced-auth-system
+```
+
+### Testes
+
+```bash
+# Executar todos os testes
 npm test
 
-# Run with coverage
-npm run test:coverage
+# Executar com cobertura
+npm run test -- --coverage
 ```
 
-### 📁 Estrutura do Projeto
+### Licenca
 
-```
-Advanced-Authentication-System-TS/
-├── src/          # Source code
-│   ├── services/      # Business logic
-│   │   ├── __tests__/
-│   │   ├── auth.service.ts
-│   │   ├── mfa.service.ts
-│   │   ├── password.service.ts
-│   │   ├── token.service.ts
-│   │   └── user.store.ts
-│   ├── utils/         # Utilities
-│   │   ├── __tests__/
-│   │   ├── rate-limiter.ts
-│   │   └── validation.ts
-│   ├── config.ts
-│   ├── errors.ts
-│   ├── index.ts
-│   └── types.ts
-├── LICENSE
-├── README.md
-├── jest.config.ts
-├── main.ts
-├── package.json
-└── tsconfig.json
-```
+Este projeto esta licenciado sob a Licenca MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
 
-### 🔒 Security Considerations
-
-| Feature | Implementation |
-|---------|---------------|
-| **Authentication** | JWT tokens with configurable expiration |
-| **Authorization** | Role-based access control (RBAC) |
-| **Input Validation** | Schema-based validation on all endpoints |
-| **Rate Limiting** | Configurable request throttling |
-| **Data Encryption** | AES-256 for sensitive data at rest |
-| **SQL Injection** | ORM-based queries prevent injection |
-| **CORS** | Configurable CORS policies |
-| **Audit Logging** | Complete request/response audit trail |
-
-> ⚠️ **Production Deployment**: Always configure proper SSL/TLS, rotate secrets regularly, and follow the principle of least privilege.
-
-### 🛠️ Stack Tecnológica
-
-| Tecnologia | Descrição | Papel |
-|------------|-----------|-------|
-| **TypeScript** | Core Language | Primary |
-
-### 🤝 Contribuindo
-
-Contribuições são bem-vindas! Sinta-se à vontade para enviar um Pull Request.
-
-### 📄 Licença
-
-Este projeto está licenciado sob a Licença MIT - veja o arquivo [LICENSE](LICENSE) para detalhes.
-
-### 👤 Autor
+### Autor
 
 **Gabriel Demetrios Lafis**
 - GitHub: [@galafis](https://github.com/galafis)
